@@ -2,9 +2,9 @@
   "name": "todolist-backend",
   "version": "1.0.0",
   "description": "This is the back end app of the To Do List made for the Career Blitz by Trybe",
-  "main": "src/index.js",
+  "main": "src/api",
   "scripts": {
-    "dev": "nodemon src/index.js",
+    "dev": "nodemon .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
