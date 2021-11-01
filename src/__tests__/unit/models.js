@@ -5,7 +5,7 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const mockData = require('../mock/data');
 
-const mongoConnection = require('../../models/connection');
+const mongoConnection = require('../../models');
 const TaskModel = require('../../models/TaskModel');
 
 describe('taskController', () => {
