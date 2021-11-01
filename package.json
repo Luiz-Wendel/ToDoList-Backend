@@ -18,5 +18,10 @@
   "bugs": {
     "url": "https://github.com/Luiz-Wendel/ToDoList-Backend/issues"
   },
-  "homepage": "https://github.com/Luiz-Wendel/ToDoList-Backend#readme"
+  "homepage": "https://github.com/Luiz-Wendel/ToDoList-Backend#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^14.1.0",
+    "@commitlint/config-conventional": "^14.1.0",
+    "husky": "^7.0.4"
+  }
 }
