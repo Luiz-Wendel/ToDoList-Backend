@@ -12,5 +12,13 @@
     "ecmaVersion": 2021
   },
   "rules": {
-  }
+  },
+  "overrides": [
+    {
+     "files": ["src/__tests__/unit/*.js"],
+        "rules": {
+           "no-unused-expressions": 0
+        }
+    }
+   ]
 }
