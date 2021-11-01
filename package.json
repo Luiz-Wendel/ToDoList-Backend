@@ -5,7 +5,8 @@
   "main": "src/api",
   "scripts": {
     "dev": "nodemon .",
-    "test": "mocha src/__tests__/unit/*.js --exit"
+    "test": "mocha src/__tests__/unit/*.js --exit",
+    "test:coverage": "nyc mocha src/__tests__/unit/*.js --exit"
   },
   "repository": {
     "type": "git",
