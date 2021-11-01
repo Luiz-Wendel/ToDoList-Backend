@@ -66,10 +66,10 @@ describe('taskController', () => {
           asyncTaskInsertions.push(connectionMock.collection('tasks').insertOne(task));
         });
 
-        const taskIds = await Promise.all(asyncTaskInsertions);
+        const insertions = await Promise.all(asyncTaskInsertions);
 
-        taskIds.forEach((id, index) => {
-          tasks[index] = { ...tasks[index], _id: id };
+        insertions.forEach(({ insertedId }, index) => {
+          tasks[index] = { ...tasks[index], _id: insertedId };
         });
       });
 
