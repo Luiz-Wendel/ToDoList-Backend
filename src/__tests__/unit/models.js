@@ -91,10 +91,10 @@ describe('taskModel', () => {
         connectionMock.collection('tasks').deleteMany({});
       });
 
-      it('should return an object', async () => {
+      it('should return a strin', async () => {
         const response = await TaskModel.create(task);
 
-        expect(response).to.be.a('object');
+        expect(response).to.be.a('string');
       });
 
       it('should exist a task with the description on the db', async () => {
