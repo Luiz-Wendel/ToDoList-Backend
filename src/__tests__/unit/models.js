@@ -9,27 +9,27 @@ const mongoConnection = require('../../models');
 const TaskModel = require('../../models/TaskModel');
 
 describe('taskModel', () => {
+  const DBServer = new MongoMemoryServer();
+  let connectionMock;
+
+  before(async () => {
+    const URLMock = await DBServer.getUri();
+
+    connectionMock = await MongoClient
+      .connect(URLMock, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      })
+      .then((conn) => conn.db('tests'));
+
+    sinon.stub(mongoConnection, 'getConnection').resolves(connectionMock);
+  });
+
+  after(() => {
+    mongoConnection.getConnection.restore();
+  });
+
   describe('getAll', () => {
-    const DBServer = new MongoMemoryServer();
-    let connectionMock;
-
-    before(async () => {
-      const URLMock = await DBServer.getUri();
-
-      connectionMock = await MongoClient
-        .connect(URLMock, {
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
-        })
-        .then((conn) => conn.db('tests'));
-
-      sinon.stub(mongoConnection, 'getConnection').resolves(connectionMock);
-    });
-
-    after(() => {
-      mongoConnection.getConnection.restore();
-    });
-
     describe('when it has no tasks', () => {
       it('should return an array', async () => {
         const response = await TaskModel.getAll();
@@ -78,6 +78,29 @@ describe('taskModel', () => {
         response.forEach((task, index) => {
           expect(task).to.deep.equal(tasks[index]);
         });
+      });
+    });
+  });
+
+  describe('create', () => {
+    describe('on success', () => {
+      const task = mockData.tasks[0];
+      const { description } = task;
+
+      after(async () => {
+        connectionMock.collection('tasks').deleteMany({});
+      });
+
+      it('should return a string', async () => {
+        const response = await TaskModel.create(task);
+
+        expect(response).to.be.a('string');
+      });
+
+      it('should exist a task with the description on the db', async () => {
+        const existingTask = await connectionMock.collection('tasks').findOne({ description });
+
+        expect(existingTask).not.to.be.null;
       });
     });
   });
