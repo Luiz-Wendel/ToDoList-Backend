@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon .",
     "test": "mocha src/__tests__/unit/*.js --exit",
-    "test:coverage": "nyc mocha src/__tests__/unit/*.js --exit"
+    "test:coverage": "nyc --reporter html --report-dir coverage/summary mocha src/__tests__/unit/*.js --exit"
   },
   "repository": {
     "type": "git",
