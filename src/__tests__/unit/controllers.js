@@ -17,7 +17,7 @@ describe('taskController', () => {
         response.status = sinon.stub().returns(response);
         response.json = sinon.stub().returns();
 
-        sinon.stub(taskService, 'getAll').resolves({ tasks: [] });
+        sinon.stub(taskService, 'getAll').resolves([]);
       });
 
       after(() => {
@@ -52,7 +52,7 @@ describe('taskController', () => {
         response.status = sinon.stub().returns(response);
         response.json = sinon.stub().returns();
 
-        sinon.stub(taskService, 'getAll').resolves({ tasks });
+        sinon.stub(taskService, 'getAll').resolves(tasks);
       });
 
       after(() => {
