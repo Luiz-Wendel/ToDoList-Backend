@@ -78,4 +78,37 @@ describe('taskController', () => {
       });
     });
   });
+
+  describe('create', () => {
+    describe('on success', () => {
+      const task = mockData.tasks[0];
+      const request = {};
+      const response = {};
+
+      before(async () => {
+        request.body = { description: task.description };
+
+        response.status = sinon.stub().returns(response);
+        response.json = sinon.stub().returns();
+
+        sinon.stub(taskService, 'create').resolves(task);
+      });
+
+      after(() => {
+        taskService.create.restore();
+      });
+
+      it(`should return status ${statusCodes.created}`, async () => {
+        await taskController.create(request, response);
+
+        expect(response.status.calledWith(statusCodes.created)).to.be.true;
+      });
+
+      it('should return a "json" with the task object', async () => {
+        await taskController.create(request, response);
+
+        expect(response.json.calledWith(task)).to.be.true;
+      });
+    });
+  });
 });
