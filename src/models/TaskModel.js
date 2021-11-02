@@ -7,6 +7,6 @@ module.exports = {
 
     const tasks = await tasksCollection.find().toArray();
 
-    return { tasks };
+    return tasks;
   },
 };
