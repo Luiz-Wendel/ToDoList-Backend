@@ -61,7 +61,7 @@ describe('taskService', () => {
     describe('when the sale is created successfully', () => {
       const task = mockData.tasks[0];
       const {
-        _id: id, description, createdAt, status,
+        _id: id, description, status,
       } = task;
 
       before(() => {
@@ -98,10 +98,11 @@ describe('taskService', () => {
         expect(response.description).to.be.equal(description);
       });
 
-      it('should return an object with the "createdAt"', async () => {
+      it('should return an object with the "createdAt" as a number', async () => {
         const response = await taskService.create(description);
 
-        expect(response.createdAt).to.be.equal(createdAt);
+        expect(response.createdAt).to.be.a('number');
+        expect(response.createdAt).to.be.above(0);
       });
 
       it('should return an object with the "status"', async () => {
