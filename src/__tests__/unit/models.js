@@ -8,7 +8,7 @@ const mockData = require('../mock/data');
 const mongoConnection = require('../../models');
 const TaskModel = require('../../models/TaskModel');
 
-describe('taskController', () => {
+describe('taskModel', () => {
   describe('getAll', () => {
     const DBServer = new MongoMemoryServer();
     let connectionMock;
