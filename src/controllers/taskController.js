@@ -5,6 +5,6 @@ module.exports = {
   getAll: async (_req, res) => {
     const tasks = await taskService.getAll();
 
-    return res.status(statusCodes.ok).json(tasks);
+    return res.status(statusCodes.ok).json({ tasks });
   },
 };
