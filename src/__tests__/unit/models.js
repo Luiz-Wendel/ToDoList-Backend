@@ -31,28 +31,16 @@ describe('taskController', () => {
     });
 
     describe('when it has no tasks', () => {
-      it('should return an object', async () => {
+      it('should return an array', async () => {
         const response = await TaskModel.getAll();
 
-        expect(response).to.be.an('object');
+        expect(response).to.be.an('array');
       });
 
-      it('should have the "tasks" property', async () => {
+      it('should return an empty array', async () => {
         const response = await TaskModel.getAll();
 
-        expect(response).to.have.a.property('tasks');
-      });
-
-      it('should have the "taks" property as an array', async () => {
-        const response = await TaskModel.getAll();
-
-        expect(response.tasks).to.be.an('array');
-      });
-
-      it('should have the "tasks" property with an empty array', async () => {
-        const response = await TaskModel.getAll();
-
-        expect(response.tasks).to.have.lengthOf(0);
+        expect(response).to.be.empty;
       });
     });
 
@@ -77,29 +65,17 @@ describe('taskController', () => {
         await connectionMock.collection('tasks').deleteMany({});
       });
 
-      it('should return an object', async () => {
+      it('should return an array', async () => {
         const response = await TaskModel.getAll();
 
-        expect(response).to.be.an('object');
+        expect(response).to.be.an('array');
       });
 
-      it('should have the "tasks" property', async () => {
+      it('should return an array with the tasks', async () => {
         const response = await TaskModel.getAll();
 
-        expect(response).to.have.a.property('tasks');
-      });
-
-      it('should have the tasks property as an array', async () => {
-        const response = await TaskModel.getAll();
-
-        expect(response.tasks).to.be.an('array');
-      });
-
-      it('should have the tasks property with the array of tasks', async () => {
-        const response = await TaskModel.getAll();
-
-        expect(response.tasks).to.have.lengthOf(tasks.length);
-        response.tasks.forEach((task, index) => {
+        expect(response).to.have.lengthOf(tasks.length);
+        response.forEach((task, index) => {
           expect(task).to.deep.equal(tasks[index]);
         });
       });
