@@ -7,8 +7,9 @@ const mockData = require('../mock/data');
 
 const mongoConnection = require('../../models');
 const TaskModel = require('../../models/TaskModel');
+const UserModel = require('../../models/UserModel');
 
-describe('taskModel', () => {
+describe('TaskModel', () => {
   const DBServer = new MongoMemoryServer();
   let connectionMock;
 
@@ -157,6 +158,96 @@ describe('taskModel', () => {
           .findOne({ description: updatedTask.description });
 
         expect(existingTask).not.to.be.null;
+      });
+    });
+  });
+});
+
+describe('UserModel', () => {
+  const DBServer = new MongoMemoryServer();
+  let connectionMock;
+
+  before(async () => {
+    const URLMock = await DBServer.getUri();
+
+    connectionMock = await MongoClient
+      .connect(URLMock, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      })
+      .then((conn) => conn.db('tests'));
+
+    sinon.stub(mongoConnection, 'getConnection').resolves(connectionMock);
+  });
+
+  after(() => {
+    mongoConnection.getConnection.restore();
+  });
+
+  describe('create', () => {
+    describe('on success', () => {
+      const { user } = mockData;
+      const { email } = user;
+
+      after(async () => {
+        connectionMock.collection('users').deleteMany({});
+      });
+
+      it('should return a string', async () => {
+        const response = await UserModel.create(user);
+
+        expect(response).to.be.a('string');
+      });
+
+      it('should exist a user with the email on the db', async () => {
+        const existingUser = await connectionMock.collection('users').findOne({ email });
+
+        expect(existingUser).not.to.be.null;
+      });
+    });
+  });
+
+  describe('findByEmail', () => {
+    describe('on failure', () => {
+      const { email } = mockData.user;
+      let response;
+
+      before(async () => {
+        response = await UserModel.findByEmail(email);
+      });
+
+      it('should return null', async () => {
+        expect(response).to.be.null;
+      });
+    });
+
+    describe('on success', () => {
+      const { _id, ...user } = mockData;
+      let response;
+
+      before(async () => {
+        await connectionMock.collection('users').insertOne(user);
+
+        response = await UserModel.findByEmail(user.email);
+      });
+
+      after(async () => {
+        await connectionMock.collection('users').deleteMany({});
+      });
+
+      it('should return an object', () => {
+        expect(response).to.be.an('object');
+      });
+
+      it('should return an object with the user properties', () => {
+        const userProperties = Object.keys(user);
+
+        expect(response).to.have.all.keys(userProperties);
+      });
+
+      it('should return an object with the inserted user info', () => {
+        expect(response.email).to.be.equal(user.email);
+        expect(response.password).to.be.equal(user.password);
       });
     });
   });

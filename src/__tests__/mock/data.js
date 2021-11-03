@@ -19,4 +19,10 @@ module.exports = {
       status: 'Done',
     },
   ],
+
+  user: {
+    _id: '507f1f77bcf86cd799439014',
+    email: 'test@test.com',
+    password: '123456',
+  },
 };
