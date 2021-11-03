@@ -5,6 +5,10 @@ const mockData = require('../mock/data');
 
 const TaskModel = require('../../models/TaskModel');
 const taskService = require('../../services/taskService');
+const UserModel = require('../../models/UserModel');
+const userService = require('../../services/userService');
+
+const errors = require('../../schemas/errorsSchema');
 
 describe('taskService', () => {
   describe('getAll', () => {
@@ -205,6 +209,65 @@ describe('taskService', () => {
 
       it('should return 1', () => {
         expect(response).to.be.equal(1);
+      });
+    });
+  });
+});
+
+describe('userService', () => {
+  describe('create', () => {
+    describe('when user email already exists', () => {
+      const { user } = mockData;
+      const errorObject = errors.users.alreadyExists;
+      let response;
+
+      before(async () => {
+        sinon.stub(UserModel, 'findByEmail').resolves(user);
+
+        response = await userService.create(user);
+      });
+
+      after(() => {
+        UserModel.findByEmail.restore();
+      });
+
+      it('should return an object', async () => {
+        expect(response).to.be.an('object');
+      });
+
+      it('should return the error object', async () => {
+        expect(response).to.deep.equal(errorObject);
+      });
+    });
+
+    describe('when the user is created successfully', () => {
+      const { _id: id, ...user } = mockData.user;
+      let response;
+
+      before(async () => {
+        sinon.stub(UserModel, 'findByEmail').resolves(null);
+        sinon.stub(UserModel, 'create').resolves(id);
+
+        response = await userService.create(user);
+      });
+
+      after(() => {
+        UserModel.create.restore();
+        UserModel.findByEmail.restore();
+      });
+
+      it('should return an object', async () => {
+        expect(response).to.be.an('object');
+      });
+
+      it('should return an object with the user properties', async () => {
+        const userProperties = ['_id', ...Object.keys(user)];
+
+        expect(response).to.have.all.keys(userProperties);
+      });
+
+      it('should return an object with the created user info', async () => {
+        expect(response).to.deep.equal({ _id: id, ...user });
       });
     });
   });
