@@ -16,6 +16,8 @@ module.exports = {
   signin: async ({ email, password }) => {
     const user = await UserModel.findByEmail(email);
 
-    return user !== null && user.password === password;
+    if (user === null || user.password !== password) return errors.users.invalidData;
+
+    return user;
   },
 };
