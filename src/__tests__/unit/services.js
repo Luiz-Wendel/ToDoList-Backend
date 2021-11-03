@@ -58,7 +58,7 @@ describe('taskService', () => {
   });
 
   describe('create', () => {
-    describe('when the sale is created successfully', () => {
+    describe('when the task is created successfully', () => {
       const task = mockData.tasks[0];
       const {
         _id: id, description, status,
@@ -109,6 +109,54 @@ describe('taskService', () => {
         const response = await taskService.create(description);
 
         expect(response.status).to.be.equal(status);
+      });
+    });
+  });
+
+  describe('remove', () => {
+    const { _id: id } = mockData.tasks[0];
+
+    describe('when the task does not exists', () => {
+      let response;
+
+      before(async () => {
+        sinon.stub(TaskModel, 'remove').resolves(0);
+
+        response = await taskService.remove(id);
+      });
+
+      after(() => {
+        TaskModel.remove.restore();
+      });
+
+      it('should return a number', () => {
+        expect(response).to.be.a('number');
+      });
+
+      it('should return 0', () => {
+        expect(response).to.be.equal(0);
+      });
+    });
+
+    describe('when the task is deleted successfully', () => {
+      let response;
+
+      before(async () => {
+        sinon.stub(TaskModel, 'remove').resolves(1);
+
+        response = await taskService.remove(id);
+      });
+
+      after(() => {
+        TaskModel.remove.restore();
+      });
+
+      it('should return a number', () => {
+        expect(response).to.be.a('number');
+      });
+
+      it('should return 1', () => {
+        expect(response).to.be.equal(1);
       });
     });
   });
