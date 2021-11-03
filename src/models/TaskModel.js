@@ -9,4 +9,13 @@ module.exports = {
 
     return tasks;
   },
+
+  create: async (task) => {
+    const tasksCollection = await mongoConnection.getConnection()
+      .then((db) => db.collection('tasks'));
+
+    const { insertedId } = await tasksCollection.insertOne(task);
+
+    return insertedId;
+  },
 };

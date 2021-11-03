@@ -7,4 +7,12 @@ module.exports = {
 
     return res.status(statusCodes.ok).json({ tasks });
   },
+
+  create: async (req, res) => {
+    const { description } = req.body;
+
+    const createdTask = await taskService.create(description);
+
+    return res.status(statusCodes.created).json(createdTask);
+  },
 };

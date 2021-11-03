@@ -6,4 +6,12 @@ module.exports = {
 
     return tasks;
   },
+
+  create: async (description) => {
+    const task = { description, createdAt: Date.now(), status: 'Pending' };
+
+    const insertedId = await TaskModel.create(task);
+
+    return { _id: insertedId, ...task };
+  },
 };

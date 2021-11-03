@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon .",
     "test": "mocha src/__tests__/unit/*.js --exit",
-    "test:coverage": "nyc --reporter html --report-dir coverage/summary mocha src/__tests__/unit/*.js --exit"
+    "test:coverage": "nyc --reporter html --reporter text --report-dir coverage/summary npm test"
   },
   "repository": {
     "type": "git",
@@ -39,6 +39,7 @@
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "joi": "^17.4.2",
     "mongodb": "^3.7.3",
     "nyc": "^15.1.0"
   }
