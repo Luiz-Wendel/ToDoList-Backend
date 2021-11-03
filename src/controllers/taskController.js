@@ -33,7 +33,7 @@ module.exports = {
 
     const updated = await taskService.update({ _id: id, description, status });
 
-    if (!updated) return next(errors.tasks.notFound);
+    if (!updated) return next(errors.tasks.notUpdated);
 
     return res.status(statusCodes.ok).json({
       _id: id, description, createdAt, status,
