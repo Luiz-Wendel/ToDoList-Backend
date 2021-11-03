@@ -11,4 +11,12 @@ module.exports = {
 
     return insertedId;
   },
+
+  findByEmail: async (email) => {
+    const usersCollection = await getUsersCollection();
+
+    const user = await usersCollection.findOne({ email });
+
+    return user;
+  },
 };
