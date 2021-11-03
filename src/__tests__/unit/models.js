@@ -7,8 +7,9 @@ const mockData = require('../mock/data');
 
 const mongoConnection = require('../../models');
 const TaskModel = require('../../models/TaskModel');
+const UserModel = require('../../models/UserModel');
 
-describe('taskModel', () => {
+describe('TaskModel', () => {
   const DBServer = new MongoMemoryServer();
   let connectionMock;
 
@@ -157,6 +158,51 @@ describe('taskModel', () => {
           .findOne({ description: updatedTask.description });
 
         expect(existingTask).not.to.be.null;
+      });
+    });
+  });
+});
+
+describe('UserModel', () => {
+  const DBServer = new MongoMemoryServer();
+  let connectionMock;
+
+  before(async () => {
+    const URLMock = await DBServer.getUri();
+
+    connectionMock = await MongoClient
+      .connect(URLMock, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      })
+      .then((conn) => conn.db('tests'));
+
+    sinon.stub(mongoConnection, 'getConnection').resolves(connectionMock);
+  });
+
+  after(() => {
+    mongoConnection.getConnection.restore();
+  });
+
+  describe('create', () => {
+    describe('on success', () => {
+      const { user } = mockData;
+      const { email } = user;
+
+      after(async () => {
+        connectionMock.collection('users').deleteMany({});
+      });
+
+      it('should return a string', async () => {
+        const response = await UserModel.create(user);
+
+        expect(response).to.be.a('string');
+      });
+
+      it('should exist a user with the email on the db', async () => {
+        const existingUser = await connectionMock.collection('users').findOne({ email });
+
+        expect(existingUser).not.to.be.null;
       });
     });
   });
