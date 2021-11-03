@@ -12,4 +12,10 @@ module.exports = {
 
     return { _id: insertedId, email, password };
   },
+
+  signin: async ({ email, password }) => {
+    const user = await UserModel.findByEmail(email);
+
+    return user !== null && user.password === password;
+  },
 };
