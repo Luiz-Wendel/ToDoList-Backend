@@ -206,4 +206,49 @@ describe('UserModel', () => {
       });
     });
   });
+
+  describe('findByEmail', () => {
+    describe('on failure', () => {
+      const { email } = mockData.user;
+      let response;
+
+      before(async () => {
+        response = await UserModel.findByEmail(email);
+      });
+
+      it('should return null', async () => {
+        expect(response).to.be.null;
+      });
+    });
+
+    describe('on success', () => {
+      const { _id, ...user } = mockData;
+      let response;
+
+      before(async () => {
+        await connectionMock.collection('users').insertOne(user);
+
+        response = await UserModel.findByEmail(user.email);
+      });
+
+      after(async () => {
+        await connectionMock.collection('users').deleteMany({});
+      });
+
+      it('should return an object', () => {
+        expect(response).to.be.an('object');
+      });
+
+      it('should return an object with the user properties', () => {
+        const userProperties = Object.keys(user);
+
+        expect(response).to.have.all.keys(userProperties);
+      });
+
+      it('should return an object with the inserted user info', () => {
+        expect(response.email).to.be.equal(user.email);
+        expect(response.password).to.be.equal(user.password);
+      });
+    });
+  });
 });
