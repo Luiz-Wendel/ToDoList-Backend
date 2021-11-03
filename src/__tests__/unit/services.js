@@ -63,13 +63,13 @@ describe('taskService', () => {
 
   describe('create', () => {
     describe('when the task is created successfully', () => {
-      const task = mockData.tasks[0];
-      const {
-        _id: id, description, status,
-      } = task;
+      const { _id: id, ...task } = mockData.tasks[0];
+      let response;
 
-      before(() => {
+      before(async () => {
         sinon.stub(TaskModel, 'create').resolves(id);
+
+        response = await taskService.create(task);
       });
 
       after(() => {
@@ -77,42 +77,32 @@ describe('taskService', () => {
       });
 
       it('should return an object', async () => {
-        const response = await taskService.create(description);
-
         expect(response).to.be.an('object');
       });
 
       it('should return an object with the task properties', async () => {
-        const taskProperties = Object.keys(task);
-
-        const response = await taskService.create(description);
+        const taskProperties = ['_id', ...Object.keys(task)];
 
         expect(response).to.have.all.keys(taskProperties);
       });
 
       it('should return an object with the "_id"', async () => {
-        const { _id: newTaskId } = await taskService.create(description);
+        const { _id: newTaskId } = response;
 
         expect(newTaskId).to.be.equal(id);
       });
 
       it('should return an object with the "description"', async () => {
-        const response = await taskService.create(description);
-
-        expect(response.description).to.be.equal(description);
+        expect(response.description).to.be.equal(task.description);
       });
 
       it('should return an object with the "createdAt" as a number', async () => {
-        const response = await taskService.create(description);
-
         expect(response.createdAt).to.be.a('number');
         expect(response.createdAt).to.be.above(0);
       });
 
       it('should return an object with the "status"', async () => {
-        const response = await taskService.create(description);
-
-        expect(response.status).to.be.equal(status);
+        expect(response.status).to.be.equal(task.status);
       });
     });
   });
