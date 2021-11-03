@@ -236,4 +236,67 @@ describe('taskController', () => {
       });
     });
   });
+
+  describe('status patch', () => {
+    describe('on failure', () => {
+      const { _id: id, status } = mockData.tasks[0];
+      const request = {};
+      const response = {};
+      const next = sinon.spy();
+
+      before(async () => {
+        request.params = { id };
+        request.body = { status };
+
+        response.status = sinon.stub().returns(response);
+        response.json = sinon.stub().returns();
+
+        sinon.stub(taskService, 'update').resolves(0);
+
+        await taskController.patchStatus(request, response, next);
+      });
+
+      after(() => {
+        taskService.update.restore();
+      });
+
+      it('should call "next"', async () => {
+        expect(next.calledOnce).to.be.true;
+      });
+
+      it('should call "next" with the task not found error object', async () => {
+        expect(next.calledWith(errors.tasks.notUpdated)).to.be.true;
+      });
+    });
+
+    describe('on success', () => {
+      const { _id: id, status } = mockData.tasks[0];
+      const request = {};
+      const response = {};
+
+      before(async () => {
+        request.params = { id };
+        request.body = { status };
+
+        response.status = sinon.stub().returns(response);
+        response.json = sinon.stub().returns();
+
+        sinon.stub(taskService, 'update').resolves(1);
+
+        await taskController.patchStatus(request, response);
+      });
+
+      after(() => {
+        taskService.update.restore();
+      });
+
+      it(`should return status ${statusCodes.noContent}`, async () => {
+        expect(response.status.calledWith(statusCodes.noContent)).to.be.true;
+      });
+
+      it('should return a "json" with an empty object', async () => {
+        expect(response.json.calledWith({})).to.be.true;
+      });
+    });
+  });
 });
