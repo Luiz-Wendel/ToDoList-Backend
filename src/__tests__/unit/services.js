@@ -271,4 +271,75 @@ describe('userService', () => {
       });
     });
   });
+
+  describe('signin', () => {
+    describe('when user does not exist', () => {
+      const { _id, ...user } = mockData;
+      let response;
+
+      before(async () => {
+        sinon.stub(UserModel, 'findByEmail').resolves(null);
+
+        response = await userService.signin({ ...user });
+      });
+
+      after(() => {
+        UserModel.findByEmail.restore();
+      });
+
+      it('should return a boolean', async () => {
+        expect(response).to.be.a('boolean');
+      });
+
+      it('should return false', async () => {
+        expect(response).to.be.false;
+      });
+    });
+
+    describe('when password does not match', () => {
+      const { _id, ...user } = mockData;
+      let response;
+
+      before(async () => {
+        sinon.stub(UserModel, 'findByEmail').resolves({ _id, ...user });
+
+        response = await userService.signin({ ...user, password: 'xablau' });
+      });
+
+      after(() => {
+        UserModel.findByEmail.restore();
+      });
+
+      it('should return a boolean', async () => {
+        expect(response).to.be.a('boolean');
+      });
+
+      it('should return false', async () => {
+        expect(response).to.be.false;
+      });
+    });
+
+    describe('on success', () => {
+      const { _id, ...user } = mockData;
+      let response;
+
+      before(async () => {
+        sinon.stub(UserModel, 'findByEmail').resolves({ _id, ...user });
+
+        response = await userService.signin({ ...user });
+      });
+
+      after(() => {
+        UserModel.findByEmail.restore();
+      });
+
+      it('should return a boolean', async () => {
+        expect(response).to.be.a('boolean');
+      });
+
+      it('should return true', async () => {
+        expect(response).to.be.true;
+      });
+    });
+  });
 });
