@@ -7,6 +7,8 @@ const errors = require('../../schemas/errorsSchema');
 
 const taskService = require('../../services/taskService');
 const taskController = require('../../controllers/taskController');
+const userService = require('../../services/userService');
+const userController = require('../../controllers/userController');
 
 describe('taskController', () => {
   describe('getAll', () => {
@@ -296,6 +298,70 @@ describe('taskController', () => {
 
       it('should return a "json" with an empty object', async () => {
         expect(response.json.calledWith({})).to.be.true;
+      });
+    });
+  });
+});
+
+describe('userController', () => {
+  describe('create', () => {
+    describe('on failure', () => {
+      const { _id, user } = mockData;
+      const errorObject = errors.users.alreadyExists;
+      const request = {};
+      const response = {};
+      const next = sinon.spy();
+
+      before(async () => {
+        request.body = { ...user };
+
+        response.status = sinon.stub().returns(response);
+        response.json = sinon.stub().returns();
+
+        sinon.stub(userService, 'create').resolves(errorObject);
+
+        await userController.create(request, response, next);
+      });
+
+      after(() => {
+        userService.create.restore();
+      });
+
+      it('should call "next"', async () => {
+        expect(next.calledOnce).to.be.true;
+      });
+
+      it('should call "next" with the task not found error object', async () => {
+        expect(next.calledWith(errorObject)).to.be.true;
+      });
+    });
+
+    describe('on success', () => {
+      const { _id, ...user } = mockData;
+      const request = {};
+      const response = {};
+
+      before(async () => {
+        request.body = { ...user };
+
+        response.status = sinon.stub().returns(response);
+        response.json = sinon.stub().returns();
+
+        sinon.stub(userService, 'create').resolves({ _id, ...user });
+
+        await userController.create(request, response);
+      });
+
+      after(() => {
+        userService.create.restore();
+      });
+
+      it(`should return status ${statusCodes.created}`, async () => {
+        expect(response.status.calledWith(statusCodes.created)).to.be.true;
+      });
+
+      it('should return a "json" with the user object', async () => {
+        expect(response.json.calledWith({ _id, ...user })).to.be.true;
       });
     });
   });
