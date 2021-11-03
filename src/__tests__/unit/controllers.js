@@ -86,10 +86,12 @@ describe('taskController', () => {
   describe('create', () => {
     describe('on success', () => {
       const task = mockData.tasks[0];
+      const { _id: id, email } = mockData.user;
       const request = {};
       const response = {};
 
       before(async () => {
+        request.user = { id, email };
         request.body = { description: task.description };
 
         response.status = sinon.stub().returns(response);
