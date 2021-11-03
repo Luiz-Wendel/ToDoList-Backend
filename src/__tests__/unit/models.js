@@ -129,15 +129,14 @@ describe('taskModel', () => {
 
   describe('update', () => {
     describe('on success', () => {
-      const task = mockData.tasks[0];
-      const { _id: id } = task;
-      const { _id, ...updatedTask } = mockData.tasks[1];
+      const { _id: _taskId, ...task } = mockData.tasks[0];
+      const { _id: _updatedTaskId, ...updatedTask } = mockData.tasks[1];
       let response;
 
       before(async () => {
-        connectionMock.collection('tasks').insertOne(task);
+        const { insertedId } = await connectionMock.collection('tasks').insertOne(task);
 
-        response = await TaskModel.update({ _id: id, ...updatedTask });
+        response = await TaskModel.update({ _id: insertedId, ...updatedTask });
       });
 
       after(async () => {
