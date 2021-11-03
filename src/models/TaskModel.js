@@ -34,7 +34,7 @@ module.exports = {
     const tasksCollection = await getTaskCollection();
 
     const { modifiedCount } = await tasksCollection
-      .updateOne({ _id: id }, { $set: { ...updatedTask } });
+      .updateOne({ _id: new ObjectId(id) }, { $set: { ...updatedTask } });
 
     return modifiedCount;
   },
