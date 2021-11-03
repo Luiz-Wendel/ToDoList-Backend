@@ -381,7 +381,7 @@ describe('userController', () => {
         response.status = sinon.stub().returns(response);
         response.json = sinon.stub().returns();
 
-        sinon.stub(userService, 'signin').resolves(false);
+        sinon.stub(userService, 'signin').resolves(errorObject);
 
         await userController.signin(request, response, next);
       });
@@ -410,7 +410,7 @@ describe('userController', () => {
         response.status = sinon.stub().returns(response);
         response.json = sinon.stub().returns();
 
-        sinon.stub(userService, 'signin').resolves(true);
+        sinon.stub(userService, 'signin').resolves({ _id, ...user });
         sinon.stub(jwt, 'sign').returns('token');
 
         await userController.signin(request, response);
