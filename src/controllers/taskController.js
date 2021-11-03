@@ -26,4 +26,17 @@ module.exports = {
 
     return res.status(statusCodes.noContent).json({});
   },
+
+  update: async (req, res, next) => {
+    const { id } = req.params;
+    const { description, createdAt, status } = req.body;
+
+    const updated = await taskService.update({ _id: id, description, status });
+
+    if (!updated) return next(errors.tasks.notUpdated);
+
+    return res.status(statusCodes.ok).json({
+      _id: id, description, createdAt, status,
+    });
+  },
 };

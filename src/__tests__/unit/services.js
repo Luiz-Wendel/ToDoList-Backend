@@ -160,4 +160,52 @@ describe('taskService', () => {
       });
     });
   });
+
+  describe('update', () => {
+    const task = mockData.tasks[0];
+
+    describe('when the task does not exists', () => {
+      let response;
+
+      before(async () => {
+        sinon.stub(TaskModel, 'update').resolves(0);
+
+        response = await taskService.update(task);
+      });
+
+      after(() => {
+        TaskModel.update.restore();
+      });
+
+      it('should return a number', () => {
+        expect(response).to.be.a('number');
+      });
+
+      it('should return 0', () => {
+        expect(response).to.be.equal(0);
+      });
+    });
+
+    describe('when the task is updated successfully', () => {
+      let response;
+
+      before(async () => {
+        sinon.stub(TaskModel, 'update').resolves(1);
+
+        response = await taskService.update(task);
+      });
+
+      after(() => {
+        TaskModel.update.restore();
+      });
+
+      it('should return a number', () => {
+        expect(response).to.be.a('number');
+      });
+
+      it('should return 1', () => {
+        expect(response).to.be.equal(1);
+      });
+    });
+  });
 });

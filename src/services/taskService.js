@@ -20,4 +20,10 @@ module.exports = {
 
     return deleted;
   },
+
+  update: async (updatedTask) => {
+    const updated = await TaskModel.update(updatedTask);
+
+    return updated;
+  },
 };
