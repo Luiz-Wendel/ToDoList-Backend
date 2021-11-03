@@ -32,5 +32,10 @@ module.exports = {
       code: 'missing_token',
       message: 'Missing auth token',
     },
+    invalid: {
+      statusCode: statusCodes.unauthorized,
+      code: 'invalid_token',
+      message: 'Invalid token',
+    },
   },
 };
