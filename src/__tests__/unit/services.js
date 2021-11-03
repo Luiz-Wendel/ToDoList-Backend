@@ -275,6 +275,7 @@ describe('userService', () => {
   describe('signin', () => {
     describe('when user does not exist', () => {
       const { _id, ...user } = mockData;
+      const errorObject = errors.users.invalidData;
       let response;
 
       before(async () => {
@@ -287,17 +288,18 @@ describe('userService', () => {
         UserModel.findByEmail.restore();
       });
 
-      it('should return a boolean', async () => {
-        expect(response).to.be.a('boolean');
+      it('should return an object', async () => {
+        expect(response).to.be.an('object');
       });
 
-      it('should return false', async () => {
-        expect(response).to.be.false;
+      it('should return the invalid data error object', async () => {
+        expect(response).to.deep.equal(errorObject);
       });
     });
 
     describe('when password does not match', () => {
       const { _id, ...user } = mockData;
+      const errorObject = errors.users.invalidData;
       let response;
 
       before(async () => {
@@ -310,12 +312,12 @@ describe('userService', () => {
         UserModel.findByEmail.restore();
       });
 
-      it('should return a boolean', async () => {
-        expect(response).to.be.a('boolean');
+      it('should return an object', async () => {
+        expect(response).to.be.an('object');
       });
 
-      it('should return false', async () => {
-        expect(response).to.be.false;
+      it('should return the invalid data error object', async () => {
+        expect(response).to.deep.equal(errorObject);
       });
     });
 
@@ -333,12 +335,12 @@ describe('userService', () => {
         UserModel.findByEmail.restore();
       });
 
-      it('should return a boolean', async () => {
-        expect(response).to.be.a('boolean');
+      it('should return an object', async () => {
+        expect(response).to.be.an('object');
       });
 
-      it('should return true', async () => {
-        expect(response).to.be.true;
+      it('should return the invalid data error object', async () => {
+        expect(response).to.deep.equal({ _id, ...user });
       });
     });
   });
