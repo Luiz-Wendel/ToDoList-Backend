@@ -29,4 +29,13 @@ module.exports = {
 
     return deletedCount;
   },
+
+  update: async ({ _id: id, ...updatedTask }) => {
+    const tasksCollection = await getTaskCollection();
+
+    const { modifiedCount } = await tasksCollection
+      .updateOne({ _id: id }, { $set: { ...updatedTask } });
+
+    return modifiedCount;
+  },
 };
