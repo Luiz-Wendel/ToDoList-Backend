@@ -26,4 +26,11 @@ module.exports = {
       message: 'Invalid email or password',
     },
   },
+  jwt: {
+    notFound: {
+      statusCode: statusCodes.unauthorized,
+      code: 'missing_token',
+      message: 'Missing auth token',
+    },
+  },
 };
