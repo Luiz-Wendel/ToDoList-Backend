@@ -202,7 +202,7 @@ describe('taskController', () => {
       });
 
       it('should call "next" with the task not found error object', async () => {
-        expect(next.calledWith(errors.tasks.notFound)).to.be.true;
+        expect(next.calledWith(errors.tasks.notUpdated)).to.be.true;
       });
     });
 
