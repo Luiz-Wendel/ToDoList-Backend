@@ -126,4 +126,39 @@ describe('taskModel', () => {
       });
     });
   });
+
+  describe('update', () => {
+    describe('on success', () => {
+      const task = mockData.tasks[0];
+      const { _id: id } = task;
+      const { _id, ...updatedTask } = mockData.tasks[1];
+      let response;
+
+      before(async () => {
+        connectionMock.collection('tasks').insertOne(task);
+
+        response = await TaskModel.update({ _id: id, ...updatedTask });
+      });
+
+      after(async () => {
+        connectionMock.collection('tasks').deleteMany({});
+      });
+
+      it('should return a number', async () => {
+        expect(response).to.be.a('number');
+      });
+
+      it('should return 1', async () => {
+        expect(response).to.be.equal(1);
+      });
+
+      it('should exist a task with the new description on the db', async () => {
+        const existingTask = await connectionMock
+          .collection('tasks')
+          .findOne({ description: updatedTask.description });
+
+        expect(existingTask).not.to.be.null;
+      });
+    });
+  });
 });
