@@ -14,4 +14,10 @@ module.exports = {
 
     return { _id: insertedId, ...task };
   },
+
+  remove: async (id) => {
+    const deleted = await TaskModel.remove(id);
+
+    return deleted;
+  },
 };
