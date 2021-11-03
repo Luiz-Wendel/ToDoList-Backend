@@ -1,6 +1,5 @@
 const userService = require('../services/userService');
 const statusCodes = require('../schemas/statusCodesSchema');
-const errors = require('../schemas/errorsSchema');
 const { createToken } = require('../helpers/jwt');
 
 module.exports = {
@@ -17,11 +16,13 @@ module.exports = {
   signin: async (req, res, next) => {
     const { email, password } = req.body;
 
-    const isValid = await userService.signin({ email, password });
+    const result = await userService.signin({ email, password });
 
-    if (!isValid) return next(errors.users.invalidData);
+    if (result.statusCode) return next(result);
 
-    const token = createToken({ email });
+    const { _id: id } = result;
+
+    const token = createToken({ id, email });
 
     return res.status(statusCodes.ok).json({ token });
   },
