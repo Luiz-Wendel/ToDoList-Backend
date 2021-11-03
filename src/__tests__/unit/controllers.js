@@ -1,5 +1,6 @@
 const sinon = require('sinon');
 const { expect } = require('chai');
+const jwt = require('jsonwebtoken');
 
 const mockData = require('../mock/data');
 const statusCodes = require('../../schemas/statusCodesSchema');
@@ -362,6 +363,70 @@ describe('userController', () => {
 
       it('should return a "json" with the user object', async () => {
         expect(response.json.calledWith({ _id, ...user })).to.be.true;
+      });
+    });
+  });
+
+  describe('signin', () => {
+    describe('on failure', () => {
+      const { _id, user } = mockData;
+      const errorObject = errors.users.invalidData;
+      const request = {};
+      const response = {};
+      const next = sinon.spy();
+
+      before(async () => {
+        request.body = { ...user };
+
+        response.status = sinon.stub().returns(response);
+        response.json = sinon.stub().returns();
+
+        sinon.stub(userService, 'signin').resolves(false);
+
+        await userController.signin(request, response, next);
+      });
+
+      after(() => {
+        userService.signin.restore();
+      });
+
+      it('should call "next"', async () => {
+        expect(next.calledOnce).to.be.true;
+      });
+
+      it('should call "next" with the task not found error object', async () => {
+        expect(next.calledWith(errorObject)).to.be.true;
+      });
+    });
+
+    describe('on success', () => {
+      const { _id, ...user } = mockData;
+      const request = {};
+      const response = {};
+
+      before(async () => {
+        request.body = { ...user };
+
+        response.status = sinon.stub().returns(response);
+        response.json = sinon.stub().returns();
+
+        sinon.stub(userService, 'signin').resolves(true);
+        sinon.stub(jwt, 'sign').returns('token');
+
+        await userController.signin(request, response);
+      });
+
+      after(() => {
+        userService.signin.restore();
+        jwt.sign.restore();
+      });
+
+      it(`should return status ${statusCodes.ok}`, async () => {
+        expect(response.status.calledWith(statusCodes.ok)).to.be.true;
+      });
+
+      it('should return a "json" with the token', async () => {
+        expect(response.json.calledWith({ token: 'token' })).to.be.true;
       });
     });
   });
