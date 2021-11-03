@@ -91,7 +91,7 @@ describe('taskModel', () => {
         connectionMock.collection('tasks').deleteMany({});
       });
 
-      it('should return a strin', async () => {
+      it('should return a string', async () => {
         const response = await TaskModel.create(task);
 
         expect(response).to.be.a('string');
@@ -101,6 +101,28 @@ describe('taskModel', () => {
         const existingTask = await connectionMock.collection('tasks').findOne({ description });
 
         expect(existingTask).not.to.be.null;
+      });
+    });
+  });
+
+  describe('remove', () => {
+    describe('on success', () => {
+      let response;
+
+      before(async () => {
+        const { _id, ...task } = mockData.tasks[0];
+
+        const { insertedId } = await connectionMock.collection('tasks').insertOne(task);
+
+        response = await TaskModel.remove(insertedId.toString());
+      });
+
+      it('should return a number', () => {
+        expect(response).to.be.a('number');
+      });
+
+      it('should return 1', () => {
+        expect(response).to.be.equal(1);
       });
     });
   });
