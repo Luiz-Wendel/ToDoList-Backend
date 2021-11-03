@@ -10,9 +10,13 @@ module.exports = {
   },
 
   create: async (req, res) => {
-    const { description } = req.body;
+    const { body: { description }, user: { id } } = req;
 
-    const createdTask = await taskService.create(description);
+    const task = {
+      description, createdAt: Date.now(), status: 'Pending', userId: id,
+    };
+
+    const createdTask = await taskService.create(task);
 
     return res.status(statusCodes.created).json(createdTask);
   },
