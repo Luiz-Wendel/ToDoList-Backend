@@ -20,5 +20,10 @@ module.exports = {
       code: 'already_exists',
       message: 'User email already registered',
     },
+    invalidData: {
+      statusCode: statusCodes.badRequest,
+      code: 'invalid_data',
+      message: 'Invalid email or password',
+    },
   },
 };
