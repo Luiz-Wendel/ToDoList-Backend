@@ -12,5 +12,14 @@ module.exports = (err, _req, res, _next) => {
     return res.status(statusCodes.preconditionFailed).json(error);
   }
 
+  if (err.statusCode) {
+    error = {
+      code: err.code,
+      message: err.message,
+    };
+
+    return res.status(err.statusCode).json(error);
+  }
+
   return res.status(statusCodes.internalServerError).json(err);
 };
