@@ -11,4 +11,6 @@ module.exports = {
 
     return jwt.sign(payload, JWT_SECRET, jwtConfig);
   },
+
+  validateToken: (token) => jwt.verify(token, JWT_SECRET),
 };
