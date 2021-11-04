@@ -24,11 +24,12 @@ module.exports = {
   },
 
   remove: async (req, res, next) => {
-    const { id } = req.params;
+    const { id: userId } = req.user;
+    const { id: taskId } = req.params;
 
-    const deleted = await taskService.remove(id);
+    const result = await taskService.remove(taskId, userId);
 
-    if (!deleted) return next(errors.tasks.notFound);
+    if (result.statusCode) return next(result);
 
     return res.status(statusCodes.noContent).json({});
   },
