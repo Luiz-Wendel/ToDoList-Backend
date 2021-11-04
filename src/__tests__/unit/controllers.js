@@ -117,19 +117,24 @@ describe('taskController', () => {
   });
 
   describe('remove', () => {
-    describe('on failure', () => {
-      const { _id: id } = mockData.tasks[0];
+    const { _id: taskId, ...task } = mockData.tasks[0];
+    const { users } = mockData;
+
+    describe('when another user tries to remove the task', () => {
+      const { _is: userId, email } = users[1];
+      const errorObject = errors.tasks.ownership;
       const request = {};
       const response = {};
       const next = sinon.spy();
 
       before(async () => {
-        request.params = { id };
+        request.user = { id: userId, email };
+        request.params = { id: taskId };
 
         response.status = sinon.stub().returns(response);
         response.json = sinon.stub().returns();
 
-        sinon.stub(taskService, 'remove').resolves(0);
+        sinon.stub(taskService, 'remove').resolves(errorObject);
 
         await taskController.remove(request, response, next);
       });
@@ -143,22 +148,55 @@ describe('taskController', () => {
       });
 
       it('should call "next" with the task not found error object', async () => {
-        expect(next.calledWith(errors.tasks.notFound)).to.be.true;
+        expect(next.calledWith(errorObject)).to.be.true;
       });
     });
 
-    describe('on success', () => {
-      const { _id: id } = mockData.tasks[0];
+    describe('when recipe does not exist', () => {
+      const { id: userId, email } = users[0];
+      const errorObject = errors.tasks.notFound;
       const request = {};
       const response = {};
+      const next = sinon.spy();
 
       before(async () => {
-        request.params = { id };
+        request.user = { id: userId, email };
+        request.params = { id: taskId };
 
         response.status = sinon.stub().returns(response);
         response.json = sinon.stub().returns();
 
-        sinon.stub(taskService, 'remove').resolves(1);
+        sinon.stub(taskService, 'remove').resolves(errorObject);
+
+        await taskController.remove(request, response, next);
+      });
+
+      after(() => {
+        taskService.remove.restore();
+      });
+
+      it('should call "next"', async () => {
+        expect(next.calledOnce).to.be.true;
+      });
+
+      it('should call "next" with the task not found error object', async () => {
+        expect(next.calledWith(errorObject)).to.be.true;
+      });
+    });
+
+    describe('on success', () => {
+      const { _id: userId } = users[0];
+      const request = {};
+      const response = {};
+
+      before(async () => {
+        request.user = { id: userId };
+        request.params = { id: taskId };
+
+        response.status = sinon.stub().returns(response);
+        response.json = sinon.stub().returns();
+
+        sinon.stub(taskService, 'remove').resolves({ _id: taskId, ...task });
 
         await taskController.remove(request, response);
       });
