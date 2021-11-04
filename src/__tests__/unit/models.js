@@ -31,22 +31,27 @@ describe('TaskModel', () => {
   });
 
   describe('getAll', () => {
-    describe('when it has no tasks', () => {
-      it('should return an array', async () => {
-        const response = await TaskModel.getAll();
+    const { _id: userId } = mockData.users[0];
 
+    describe('when it has no tasks', () => {
+      let response;
+
+      before(async () => {
+        response = await TaskModel.getAll(userId);
+      });
+
+      it('should return an array', async () => {
         expect(response).to.be.an('array');
       });
 
       it('should return an empty array', async () => {
-        const response = await TaskModel.getAll();
-
         expect(response).to.be.empty;
       });
     });
 
     describe('when it has tasks', () => {
-      const tasks = [...mockData.tasks];
+      const tasks = mockData.tasks.filter((task) => task.userId === userId);
+      let response;
 
       before(async () => {
         const asyncTaskInsertions = [];
@@ -60,6 +65,8 @@ describe('TaskModel', () => {
         insertions.forEach(({ insertedId }, index) => {
           tasks[index] = { ...tasks[index], _id: insertedId };
         });
+
+        response = await TaskModel.getAll(userId);
       });
 
       after(async () => {
@@ -67,14 +74,10 @@ describe('TaskModel', () => {
       });
 
       it('should return an array', async () => {
-        const response = await TaskModel.getAll();
-
         expect(response).to.be.an('array');
       });
 
       it('should return an array with the tasks', async () => {
-        const response = await TaskModel.getAll();
-
         expect(response).to.have.lengthOf(tasks.length);
         response.forEach((task, index) => {
           expect(task).to.deep.equal(tasks[index]);
