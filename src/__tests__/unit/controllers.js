@@ -14,14 +14,19 @@ const userController = require('../../controllers/userController');
 describe('taskController', () => {
   describe('getAll', () => {
     describe('if there is no tasks', () => {
+      const { _id: userId, email } = mockData.users[0];
       const request = {};
       const response = {};
 
       before(async () => {
+        request.user = { id: userId, email };
+
         response.status = sinon.stub().returns(response);
         response.json = sinon.stub().returns();
 
         sinon.stub(taskService, 'getAll').resolves([]);
+
+        await taskController.getAll(request, response);
       });
 
       after(() => {
@@ -29,34 +34,33 @@ describe('taskController', () => {
       });
 
       it(`should return status code ${statusCodes.ok}`, async () => {
-        await taskController.getAll(request, response);
-
         expect(response.status.calledWith(statusCodes.ok)).to.be.true;
       });
 
       it('should return a json with an object', async () => {
-        await taskController.getAll(request, response);
-
         expect(response.json.calledWith(sinon.match.object)).to.be.true;
       });
 
       it('should return a json with an object with the "tasks" property as an empty array', async () => {
-        await taskController.getAll(request, response);
-
         expect(response.json.calledWith({ tasks: [] })).to.be.true;
       });
     });
 
     describe('if it has tasks', () => {
+      const { _id: userId, email } = mockData.users[0];
+      const tasks = mockData.tasks.filter((task) => task.userId === userId);
       const request = {};
       const response = {};
-      const tasks = [...mockData.tasks];
 
-      before(() => {
+      before(async () => {
+        request.user = { id: userId, email };
+
         response.status = sinon.stub().returns(response);
         response.json = sinon.stub().returns();
 
         sinon.stub(taskService, 'getAll').resolves(tasks);
+
+        await taskController.getAll(request, response);
       });
 
       after(() => {
@@ -64,20 +68,14 @@ describe('taskController', () => {
       });
 
       it(`should return status code ${statusCodes.ok}`, async () => {
-        await taskController.getAll(request, response);
-
         expect(response.status.calledWith(statusCodes.ok)).to.be.true;
       });
 
       it('should return a json with an object', async () => {
-        await taskController.getAll(request, response);
-
         expect(response.json.calledWith(sinon.match.object)).to.be.true;
       });
 
       it('should return a json with the tasks', async () => {
-        await taskController.getAll(request, response);
-
         expect(response.json.calledWith({ tasks })).to.be.true;
       });
     });
