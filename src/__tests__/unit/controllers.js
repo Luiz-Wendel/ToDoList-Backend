@@ -152,7 +152,7 @@ describe('taskController', () => {
       });
     });
 
-    describe('when recipe does not exist', () => {
+    describe('when task does not exist', () => {
       const { id: userId, email } = users[0];
       const errorObject = errors.tasks.notFound;
       const request = {};
@@ -252,7 +252,7 @@ describe('taskController', () => {
       });
     });
 
-    describe('when recipe does not exist', () => {
+    describe('when task does not exist', () => {
       const { id: userId, email } = users[0];
       const errorObject = errors.tasks.notFound;
       const request = {};
@@ -318,20 +318,25 @@ describe('taskController', () => {
   });
 
   describe('status patch', () => {
-    describe('on failure', () => {
-      const { _id: id, status } = mockData.tasks[0];
+    const { _id: id, status, ...task } = mockData.tasks[0];
+    const { users } = mockData;
+
+    describe('when another user tries to update the task status', () => {
+      const { _is: userId, email } = users[1];
+      const errorObject = errors.tasks.ownership;
       const request = {};
       const response = {};
       const next = sinon.spy();
 
       before(async () => {
+        request.user = { id: userId, email };
         request.params = { id };
         request.body = { status };
 
         response.status = sinon.stub().returns(response);
         response.json = sinon.stub().returns();
 
-        sinon.stub(taskService, 'update').resolves(0);
+        sinon.stub(taskService, 'update').resolves(errorObject);
 
         await taskController.patchStatus(request, response, next);
       });
@@ -345,23 +350,57 @@ describe('taskController', () => {
       });
 
       it('should call "next" with the task not found error object', async () => {
-        expect(next.calledWith(errors.tasks.notUpdated)).to.be.true;
+        expect(next.calledWith(errorObject)).to.be.true;
       });
     });
 
-    describe('on success', () => {
-      const { _id: id, status } = mockData.tasks[0];
+    describe('when task does not exist', () => {
+      const { id: userId, email } = users[0];
+      const errorObject = errors.tasks.notFound;
       const request = {};
       const response = {};
+      const next = sinon.spy();
 
       before(async () => {
+        request.user = { id: userId, email };
         request.params = { id };
         request.body = { status };
 
         response.status = sinon.stub().returns(response);
         response.json = sinon.stub().returns();
 
-        sinon.stub(taskService, 'update').resolves(1);
+        sinon.stub(taskService, 'update').resolves(errorObject);
+
+        await taskController.patchStatus(request, response, next);
+      });
+
+      after(() => {
+        taskService.update.restore();
+      });
+
+      it('should call "next"', async () => {
+        expect(next.calledOnce).to.be.true;
+      });
+
+      it('should call "next" with the task not found error object', async () => {
+        expect(next.calledWith(errorObject)).to.be.true;
+      });
+    });
+
+    describe('on success', () => {
+      const { _id: userId, email } = users[0];
+      const request = {};
+      const response = {};
+
+      before(async () => {
+        request.user = { id: userId, email };
+        request.params = { id };
+        request.body = { status };
+
+        response.status = sinon.stub().returns(response);
+        response.json = sinon.stub().returns();
+
+        sinon.stub(taskService, 'update').resolves({ _id: id, status, ...task });
 
         await taskController.patchStatus(request, response);
       });
@@ -370,12 +409,12 @@ describe('taskController', () => {
         taskService.update.restore();
       });
 
-      it(`should return status ${statusCodes.noContent}`, async () => {
-        expect(response.status.calledWith(statusCodes.noContent)).to.be.true;
+      it(`should return status ${statusCodes.ok}`, async () => {
+        expect(response.status.calledWith(statusCodes.ok)).to.be.true;
       });
 
-      it('should return a "json" with an empty object', async () => {
-        expect(response.json.calledWith({})).to.be.true;
+      it('should return a "json" with the updated task', async () => {
+        expect(response.json.calledWith({ _id: id, status, ...task })).to.be.true;
       });
     });
   });
