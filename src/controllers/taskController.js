@@ -38,9 +38,7 @@ module.exports = {
     const { id } = req.params;
     const { description, status } = req.body;
 
-    const result = await taskService.update({
-      _id: id, description, status, userId,
-    });
+    const result = await taskService.update({ _id: id, description, status }, userId);
 
     if (result.statusCode) return next(result);
 
