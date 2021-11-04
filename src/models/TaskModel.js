@@ -6,10 +6,10 @@ const getTaskCollection = async () => mongoConnection.getConnection()
   .then((db) => db.collection('tasks'));
 
 module.exports = {
-  getAll: async () => {
+  getAll: async (userId) => {
     const tasksCollection = await getTaskCollection();
 
-    const tasks = await tasksCollection.find().toArray();
+    const tasks = await tasksCollection.find({ userId }).toArray();
 
     return tasks;
   },
