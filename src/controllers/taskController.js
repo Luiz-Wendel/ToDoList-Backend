@@ -1,6 +1,5 @@
 const taskService = require('../services/taskService');
 const statusCodes = require('../schemas/statusCodesSchema');
-const errors = require('../schemas/errorsSchema');
 
 module.exports = {
   getAll: async (req, res) => {
@@ -49,12 +48,13 @@ module.exports = {
   },
 
   patchStatus: async (req, res, next) => {
-    const { id } = req.params;
+    const { id: userId } = req.user;
+    const { id: taskId } = req.params;
     const { status } = req.body;
 
-    const updated = await taskService.update({ _id: id, status });
+    const result = await taskService.update({ _id: taskId, status }, userId);
 
-    if (!updated) return next(errors.tasks.notUpdated);
+    if (result.statusCode) return next(result);
 
     return res.status(statusCodes.noContent).json({});
   },
