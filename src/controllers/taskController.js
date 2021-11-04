@@ -32,16 +32,17 @@ module.exports = {
   },
 
   update: async (req, res, next) => {
+    const { id: userId } = req.user;
     const { id } = req.params;
-    const { description, createdAt, status } = req.body;
+    const { description, status } = req.body;
 
-    const updated = await taskService.update({ _id: id, description, status });
-
-    if (!updated) return next(errors.tasks.notUpdated);
-
-    return res.status(statusCodes.ok).json({
-      _id: id, description, createdAt, status,
+    const result = await taskService.update({
+      _id: id, description, status, userId,
     });
+
+    if (result.statusCode) return next(result);
+
+    return res.status(statusCodes.ok).json(result);
   },
 
   patchStatus: async (req, res, next) => {
