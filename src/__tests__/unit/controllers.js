@@ -86,7 +86,7 @@ describe('taskController', () => {
   describe('create', () => {
     describe('on success', () => {
       const task = mockData.tasks[0];
-      const { _id: id, email } = mockData.user;
+      const { _id: id, email } = mockData.users[0];
       const request = {};
       const response = {};
 
@@ -180,20 +180,25 @@ describe('taskController', () => {
   });
 
   describe('update', () => {
-    describe('on failure', () => {
-      const { _id: id, ...updatedTask } = mockData.tasks[0];
+    const { _id: id, ...updatedTask } = mockData.tasks[0];
+    const { users } = mockData;
+
+    describe('when another user tries to update the task', () => {
+      const { _is: userId, email } = users[1];
+      const errorObject = errors.tasks.ownership;
       const request = {};
       const response = {};
       const next = sinon.spy();
 
       before(async () => {
+        request.user = { id: userId, email };
         request.params = { id };
         request.body = { ...updatedTask };
 
         response.status = sinon.stub().returns(response);
         response.json = sinon.stub().returns();
 
-        sinon.stub(taskService, 'update').resolves(0);
+        sinon.stub(taskService, 'update').resolves(errorObject);
 
         await taskController.update(request, response, next);
       });
@@ -207,23 +212,57 @@ describe('taskController', () => {
       });
 
       it('should call "next" with the task not found error object', async () => {
-        expect(next.calledWith(errors.tasks.notUpdated)).to.be.true;
+        expect(next.calledWith(errorObject)).to.be.true;
       });
     });
 
-    describe('on success', () => {
-      const { _id: id, ...updatedTask } = mockData.tasks[0];
+    describe('when recipe does not exist', () => {
+      const { id: userId, email } = users[0];
+      const errorObject = errors.tasks.notFound;
       const request = {};
       const response = {};
+      const next = sinon.spy();
 
       before(async () => {
+        request.user = { id: userId, email };
         request.params = { id };
         request.body = { ...updatedTask };
 
         response.status = sinon.stub().returns(response);
         response.json = sinon.stub().returns();
 
-        sinon.stub(taskService, 'update').resolves(1);
+        sinon.stub(taskService, 'update').resolves(errorObject);
+
+        await taskController.update(request, response, next);
+      });
+
+      after(() => {
+        taskService.update.restore();
+      });
+
+      it('should call "next"', async () => {
+        expect(next.calledOnce).to.be.true;
+      });
+
+      it('should call "next" with the task not found error object', async () => {
+        expect(next.calledWith(errorObject)).to.be.true;
+      });
+    });
+
+    describe('on success', () => {
+      const { _id: userId, email } = users[0];
+      const request = {};
+      const response = {};
+
+      before(async () => {
+        request.user = { id: userId, email };
+        request.params = { id };
+        request.body = { ...updatedTask };
+
+        response.status = sinon.stub().returns(response);
+        response.json = sinon.stub().returns();
+
+        sinon.stub(taskService, 'update').resolves({ _id: id, ...updatedTask });
 
         await taskController.update(request, response);
       });
