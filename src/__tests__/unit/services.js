@@ -109,49 +109,79 @@ describe('taskService', () => {
   });
 
   describe('remove', () => {
-    const { _id: id } = mockData.tasks[0];
+    const { users } = mockData;
+    const { _id: taskId, ...task } = mockData.tasks[0];
 
     describe('when the task does not exists', () => {
+      const { _id: userId } = users[0];
+      const errorObject = errors.tasks.notFound;
       let response;
 
       before(async () => {
-        sinon.stub(TaskModel, 'remove').resolves(0);
+        sinon.stub(TaskModel, 'getById').resolves(null);
 
-        response = await taskService.remove(id);
+        response = await taskService.remove(taskId, userId);
       });
 
       after(() => {
-        TaskModel.remove.restore();
+        TaskModel.getById.restore();
       });
 
-      it('should return a number', () => {
-        expect(response).to.be.a('number');
+      it('should return an object', () => {
+        expect(response).to.be.an('object');
       });
 
-      it('should return 0', () => {
-        expect(response).to.be.equal(0);
+      it('should return the task not found error', () => {
+        expect(response).to.deep.equal(errorObject);
       });
     });
 
-    describe('when the task is deleted successfully', () => {
+    describe('when other user besides the owner tries to remove', () => {
+      const { _id: userId } = users[1];
+      const errorObject = errors.tasks.ownership;
       let response;
 
       before(async () => {
-        sinon.stub(TaskModel, 'remove').resolves(1);
+        sinon.stub(TaskModel, 'getById').resolves({ _id: taskId, ...task });
 
-        response = await taskService.remove(id);
+        response = await taskService.remove(taskId, userId);
       });
 
       after(() => {
+        TaskModel.getById.restore();
+      });
+
+      it('should return an object', () => {
+        expect(response).to.be.an('object');
+      });
+
+      it('should return the ownership error object', () => {
+        expect(response).to.deep.equal(errorObject);
+      });
+    });
+
+    describe('when the task is removed successfully', () => {
+      const { _id: userId } = users[0];
+      let response;
+
+      before(async () => {
+        sinon.stub(TaskModel, 'getById').resolves({ _id: taskId, ...task });
+        sinon.stub(TaskModel, 'remove').resolves(1);
+
+        response = await taskService.remove(taskId, userId);
+      });
+
+      after(() => {
+        TaskModel.getById.restore();
         TaskModel.remove.restore();
       });
 
-      it('should return a number', () => {
-        expect(response).to.be.a('number');
+      it('should return an object', () => {
+        expect(response).to.be.an('object');
       });
 
-      it('should return 1', () => {
-        expect(response).to.be.equal(1);
+      it('should return the task', () => {
+        expect(response).to.deep.equal({ _id: taskId, ...task });
       });
     });
   });
