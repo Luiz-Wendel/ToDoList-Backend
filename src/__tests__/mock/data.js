@@ -19,13 +19,20 @@ module.exports = {
       description: 'Leave kids at school',
       createdAt: 1635797574895,
       status: 'Done',
-      userId: '507f1f77bcf86cd799439014',
+      userId: '507f1f77bcf86cd799439015',
     },
   ],
 
-  user: {
-    _id: '507f1f77bcf86cd799439014',
-    email: 'test@test.com',
-    password: '123456',
-  },
+  users: [
+    {
+      _id: '507f1f77bcf86cd799439014',
+      email: 'test@test.com',
+      password: '123456',
+    },
+    {
+      _id: '507f1f77bcf86cd799439015',
+      email: 'temp@temp.com',
+      password: '123456',
+    },
+  ],
 };
