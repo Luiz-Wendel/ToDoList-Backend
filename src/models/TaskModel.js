@@ -38,4 +38,12 @@ module.exports = {
 
     return modifiedCount;
   },
+
+  getById: async (id) => {
+    const tasksCollection = await getTaskCollection();
+
+    const task = tasksCollection.findOne({ _id: new ObjectId(id) });
+
+    return task;
+  },
 };
