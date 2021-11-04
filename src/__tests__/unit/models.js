@@ -161,6 +161,43 @@ describe('TaskModel', () => {
       });
     });
   });
+
+  describe('getById', () => {
+    describe('when the task does not exist', () => {
+      const { _id: id } = mockData.tasks[0];
+
+      it('should return null', async () => {
+        const response = await TaskModel.getById(id);
+
+        expect(response).to.be.null;
+      });
+    });
+
+    describe('when it has tasks', () => {
+      const { _id, ...task } = mockData.tasks[0];
+      let id;
+      let response;
+
+      before(async () => {
+        const { insertedId } = await connectionMock.collection('tasks').insertOne(task);
+        id = insertedId;
+
+        response = await TaskModel.getById(insertedId);
+      });
+
+      after(async () => {
+        await connectionMock.collection('tasks').deleteMany({});
+      });
+
+      it('should return an object', async () => {
+        expect(response).to.be.an('object');
+      });
+
+      it('should return the task', async () => {
+        expect(response).to.deep.equal({ _id: id, ...task });
+      });
+    });
+  });
 });
 
 describe('UserModel', () => {
