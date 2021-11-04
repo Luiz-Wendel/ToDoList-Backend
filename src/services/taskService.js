@@ -4,8 +4,8 @@ const errors = require('../schemas/errorsSchema');
 const isOwner = async (task, userId) => task.userId === userId;
 
 module.exports = {
-  getAll: async () => {
-    const tasks = await TaskModel.getAll();
+  getAll: async (userId) => {
+    const tasks = await TaskModel.getAll(userId);
 
     return tasks;
   },
