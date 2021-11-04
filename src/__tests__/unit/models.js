@@ -223,7 +223,7 @@ describe('UserModel', () => {
 
   describe('create', () => {
     describe('on success', () => {
-      const { user } = mockData;
+      const user = mockData.users[0];
       const { email } = user;
 
       after(async () => {
@@ -246,7 +246,7 @@ describe('UserModel', () => {
 
   describe('findByEmail', () => {
     describe('on failure', () => {
-      const { email } = mockData.user;
+      const { email } = mockData.users[0];
       let response;
 
       before(async () => {
