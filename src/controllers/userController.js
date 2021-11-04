@@ -8,7 +8,7 @@ module.exports = {
 
     const result = await userService.create({ email, password });
 
-    if (result.statusCode) next(result);
+    if (result.statusCode) return next(result);
 
     return res.status(statusCodes.created).json(result);
   },
