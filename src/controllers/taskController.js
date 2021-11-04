@@ -3,8 +3,10 @@ const statusCodes = require('../schemas/statusCodesSchema');
 const errors = require('../schemas/errorsSchema');
 
 module.exports = {
-  getAll: async (_req, res) => {
-    const tasks = await taskService.getAll();
+  getAll: async (req, res) => {
+    const { id } = req.user;
+
+    const tasks = await taskService.getAll(id);
 
     return res.status(statusCodes.ok).json({ tasks });
   },
