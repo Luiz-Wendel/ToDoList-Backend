@@ -1,4 +1,7 @@
 const TaskModel = require('../models/TaskModel');
+const errors = require('../schemas/errorsSchema');
+
+const isOwner = async (task, userId) => task.userId === userId;
 
 module.exports = {
   getAll: async () => {
@@ -19,9 +22,18 @@ module.exports = {
     return deleted;
   },
 
-  update: async (updatedTask) => {
-    const updated = await TaskModel.update(updatedTask);
+  update: async (updatedTask, userId) => {
+    const { _id: taskId } = updatedTask;
 
-    return updated;
+    const task = await TaskModel.getById(taskId);
+
+    if (!task) return errors.tasks.notFound;
+
+    const canUpdate = await isOwner(task, userId);
+    if (!canUpdate) return errors.tasks.ownership;
+
+    await TaskModel.update(updatedTask);
+
+    return { ...task, ...updatedTask };
   },
 };
