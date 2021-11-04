@@ -13,9 +13,14 @@ const errors = require('../../schemas/errorsSchema');
 describe('taskService', () => {
   describe('getAll', () => {
     describe('when it has no tasks', () => {
-      before(() => {
+      const { _id: userId } = mockData.users[0];
+      let response;
+
+      before(async () => {
         sinon.stub(TaskModel, 'getAll')
           .resolves([]);
+
+        response = await taskService.getAll(userId);
       });
 
       after(() => {
@@ -23,24 +28,24 @@ describe('taskService', () => {
       });
 
       it('should return an array', async () => {
-        const response = await taskService.getAll();
-
         expect(response).to.be.an('array');
       });
 
       it('should return an empty array', async () => {
-        const response = await taskService.getAll();
-
         expect(response).to.be.empty;
       });
     });
 
     describe('when it has tasks', () => {
-      const tasks = [...mockData.tasks];
+      const { _id: userId } = mockData.users[0];
+      const tasks = mockData.tasks.filter((task) => task.userId === userId);
+      let response;
 
-      before(() => {
+      before(async () => {
         sinon.stub(TaskModel, 'getAll')
           .resolves(tasks);
+
+        response = await taskService.getAll(userId);
       });
 
       after(() => {
@@ -48,14 +53,10 @@ describe('taskService', () => {
       });
 
       it('should return an array', async () => {
-        const response = await taskService.getAll();
-
         expect(response).to.be.an('array');
       });
 
       it('should return an array with the tasks', async () => {
-        const response = await taskService.getAll();
-
         expect(response).to.be.deep.equal(tasks);
       });
     });
@@ -63,13 +64,13 @@ describe('taskService', () => {
 
   describe('create', () => {
     describe('when the task is created successfully', () => {
-      const task = mockData.tasks[0];
-      const {
-        _id: id, description, status,
-      } = task;
+      const { _id: id, ...task } = mockData.tasks[0];
+      let response;
 
-      before(() => {
+      before(async () => {
         sinon.stub(TaskModel, 'create').resolves(id);
+
+        response = await taskService.create(task);
       });
 
       after(() => {
@@ -77,138 +78,188 @@ describe('taskService', () => {
       });
 
       it('should return an object', async () => {
-        const response = await taskService.create(description);
-
         expect(response).to.be.an('object');
       });
 
       it('should return an object with the task properties', async () => {
-        const taskProperties = Object.keys(task);
-
-        const response = await taskService.create(description);
+        const taskProperties = ['_id', ...Object.keys(task)];
 
         expect(response).to.have.all.keys(taskProperties);
       });
 
       it('should return an object with the "_id"', async () => {
-        const { _id: newTaskId } = await taskService.create(description);
+        const { _id: newTaskId } = response;
 
         expect(newTaskId).to.be.equal(id);
       });
 
       it('should return an object with the "description"', async () => {
-        const response = await taskService.create(description);
-
-        expect(response.description).to.be.equal(description);
+        expect(response.description).to.be.equal(task.description);
       });
 
       it('should return an object with the "createdAt" as a number', async () => {
-        const response = await taskService.create(description);
-
         expect(response.createdAt).to.be.a('number');
         expect(response.createdAt).to.be.above(0);
       });
 
       it('should return an object with the "status"', async () => {
-        const response = await taskService.create(description);
-
-        expect(response.status).to.be.equal(status);
+        expect(response.status).to.be.equal(task.status);
       });
     });
   });
 
   describe('remove', () => {
-    const { _id: id } = mockData.tasks[0];
+    const { users } = mockData;
+    const { _id: taskId, ...task } = mockData.tasks[0];
 
     describe('when the task does not exists', () => {
+      const { _id: userId } = users[0];
+      const errorObject = errors.tasks.notFound;
       let response;
 
       before(async () => {
-        sinon.stub(TaskModel, 'remove').resolves(0);
+        sinon.stub(TaskModel, 'getById').resolves(null);
 
-        response = await taskService.remove(id);
+        response = await taskService.remove(taskId, userId);
       });
 
       after(() => {
-        TaskModel.remove.restore();
+        TaskModel.getById.restore();
       });
 
-      it('should return a number', () => {
-        expect(response).to.be.a('number');
+      it('should return an object', () => {
+        expect(response).to.be.an('object');
       });
 
-      it('should return 0', () => {
-        expect(response).to.be.equal(0);
+      it('should return the task not found error', () => {
+        expect(response).to.deep.equal(errorObject);
       });
     });
 
-    describe('when the task is deleted successfully', () => {
+    describe('when other user besides the owner tries to remove', () => {
+      const { _id: userId } = users[1];
+      const errorObject = errors.tasks.ownership;
       let response;
 
       before(async () => {
-        sinon.stub(TaskModel, 'remove').resolves(1);
+        sinon.stub(TaskModel, 'getById').resolves({ _id: taskId, ...task });
 
-        response = await taskService.remove(id);
+        response = await taskService.remove(taskId, userId);
       });
 
       after(() => {
+        TaskModel.getById.restore();
+      });
+
+      it('should return an object', () => {
+        expect(response).to.be.an('object');
+      });
+
+      it('should return the ownership error object', () => {
+        expect(response).to.deep.equal(errorObject);
+      });
+    });
+
+    describe('when the task is removed successfully', () => {
+      const { _id: userId } = users[0];
+      let response;
+
+      before(async () => {
+        sinon.stub(TaskModel, 'getById').resolves({ _id: taskId, ...task });
+        sinon.stub(TaskModel, 'remove').resolves(1);
+
+        response = await taskService.remove(taskId, userId);
+      });
+
+      after(() => {
+        TaskModel.getById.restore();
         TaskModel.remove.restore();
       });
 
-      it('should return a number', () => {
-        expect(response).to.be.a('number');
+      it('should return an object', () => {
+        expect(response).to.be.an('object');
       });
 
-      it('should return 1', () => {
-        expect(response).to.be.equal(1);
+      it('should return the task', () => {
+        expect(response).to.deep.equal({ _id: taskId, ...task });
       });
     });
   });
 
   describe('update', () => {
-    const task = mockData.tasks[0];
+    const { _id, ...task } = mockData.tasks[0];
+    const { users } = mockData;
 
     describe('when the task does not exists', () => {
+      const { _id: userId } = users[0];
+      const errorObject = errors.tasks.notFound;
       let response;
 
       before(async () => {
-        sinon.stub(TaskModel, 'update').resolves(0);
+        sinon.stub(TaskModel, 'getById').resolves(null);
 
-        response = await taskService.update(task);
+        response = await taskService.update({ ...task }, userId);
       });
 
       after(() => {
-        TaskModel.update.restore();
+        TaskModel.getById.restore();
       });
 
-      it('should return a number', () => {
-        expect(response).to.be.a('number');
+      it('should return an object', () => {
+        expect(response).to.be.an('object');
       });
 
-      it('should return 0', () => {
-        expect(response).to.be.equal(0);
+      it('should return the task not found error', () => {
+        expect(response).to.deep.equal(errorObject);
+      });
+    });
+
+    describe('when other user besides the owner tries to update', () => {
+      const { _id: userId } = users[1];
+      const errorObject = errors.tasks.ownership;
+      let response;
+
+      before(async () => {
+        sinon.stub(TaskModel, 'getById').resolves({ _id, ...task });
+
+        response = await taskService.update(task, userId);
+      });
+
+      after(() => {
+        TaskModel.getById.restore();
+      });
+
+      it('should return an object', () => {
+        expect(response).to.be.an('object');
+      });
+
+      it('should return the ownership error object', () => {
+        expect(response).to.deep.equal(errorObject);
       });
     });
 
     describe('when the task is updated successfully', () => {
+      const { _id: userId } = users[0];
       let response;
 
       before(async () => {
+        sinon.stub(TaskModel, 'getById').resolves({ _id, ...task });
         sinon.stub(TaskModel, 'update').resolves(1);
 
-        response = await taskService.update(task);
+        response = await taskService.update(task, userId);
       });
 
       after(() => {
+        TaskModel.getById.restore();
         TaskModel.update.restore();
       });
 
-      it('should return a number', () => {
-        expect(response).to.be.a('number');
+      it('should return an object', () => {
+        expect(response).to.be.an('object');
       });
 
-      it('should return 1', () => {
-        expect(response).to.be.equal(1);
+      it('should return the task', () => {
+        expect(response).to.deep.equal({ _id, ...task });
       });
     });
   });
@@ -217,7 +268,7 @@ describe('taskService', () => {
 describe('userService', () => {
   describe('create', () => {
     describe('when user email already exists', () => {
-      const { user } = mockData;
+      const user = mockData.users[0];
       const errorObject = errors.users.alreadyExists;
       let response;
 
@@ -241,7 +292,7 @@ describe('userService', () => {
     });
 
     describe('when the user is created successfully', () => {
-      const { _id: id, ...user } = mockData.user;
+      const { _id: id, ...user } = mockData.users[0];
       let response;
 
       before(async () => {
@@ -275,6 +326,7 @@ describe('userService', () => {
   describe('signin', () => {
     describe('when user does not exist', () => {
       const { _id, ...user } = mockData;
+      const errorObject = errors.users.invalidData;
       let response;
 
       before(async () => {
@@ -287,17 +339,18 @@ describe('userService', () => {
         UserModel.findByEmail.restore();
       });
 
-      it('should return a boolean', async () => {
-        expect(response).to.be.a('boolean');
+      it('should return an object', async () => {
+        expect(response).to.be.an('object');
       });
 
-      it('should return false', async () => {
-        expect(response).to.be.false;
+      it('should return the invalid data error object', async () => {
+        expect(response).to.deep.equal(errorObject);
       });
     });
 
     describe('when password does not match', () => {
       const { _id, ...user } = mockData;
+      const errorObject = errors.users.invalidData;
       let response;
 
       before(async () => {
@@ -310,12 +363,12 @@ describe('userService', () => {
         UserModel.findByEmail.restore();
       });
 
-      it('should return a boolean', async () => {
-        expect(response).to.be.a('boolean');
+      it('should return an object', async () => {
+        expect(response).to.be.an('object');
       });
 
-      it('should return false', async () => {
-        expect(response).to.be.false;
+      it('should return the invalid data error object', async () => {
+        expect(response).to.deep.equal(errorObject);
       });
     });
 
@@ -333,12 +386,12 @@ describe('userService', () => {
         UserModel.findByEmail.restore();
       });
 
-      it('should return a boolean', async () => {
-        expect(response).to.be.a('boolean');
+      it('should return an object', async () => {
+        expect(response).to.be.an('object');
       });
 
-      it('should return true', async () => {
-        expect(response).to.be.true;
+      it('should return the invalid data error object', async () => {
+        expect(response).to.deep.equal({ _id, ...user });
       });
     });
   });

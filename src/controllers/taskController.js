@@ -1,52 +1,58 @@
 const taskService = require('../services/taskService');
 const statusCodes = require('../schemas/statusCodesSchema');
-const errors = require('../schemas/errorsSchema');
 
 module.exports = {
-  getAll: async (_req, res) => {
-    const tasks = await taskService.getAll();
+  getAll: async (req, res) => {
+    const { id } = req.user;
+
+    const tasks = await taskService.getAll(id);
 
     return res.status(statusCodes.ok).json({ tasks });
   },
 
   create: async (req, res) => {
-    const { description } = req.body;
+    const { body: { description }, user: { id } } = req;
 
-    const createdTask = await taskService.create(description);
+    const task = {
+      description, createdAt: Date.now(), status: 'Pending', userId: id,
+    };
+
+    const createdTask = await taskService.create(task);
 
     return res.status(statusCodes.created).json(createdTask);
   },
 
   remove: async (req, res, next) => {
-    const { id } = req.params;
+    const { id: userId } = req.user;
+    const { id: taskId } = req.params;
 
-    const deleted = await taskService.remove(id);
+    const result = await taskService.remove(taskId, userId);
 
-    if (!deleted) return next(errors.tasks.notFound);
+    if (result.statusCode) return next(result);
 
     return res.status(statusCodes.noContent).json({});
   },
 
   update: async (req, res, next) => {
+    const { id: userId } = req.user;
     const { id } = req.params;
-    const { description, createdAt, status } = req.body;
+    const { description, status } = req.body;
 
-    const updated = await taskService.update({ _id: id, description, status });
+    const result = await taskService.update({ _id: id, description, status }, userId);
 
-    if (!updated) return next(errors.tasks.notUpdated);
+    if (result.statusCode) return next(result);
 
-    return res.status(statusCodes.ok).json({
-      _id: id, description, createdAt, status,
-    });
+    return res.status(statusCodes.ok).json(result);
   },
 
   patchStatus: async (req, res, next) => {
-    const { id } = req.params;
+    const { id: userId } = req.user;
+    const { id: taskId } = req.params;
     const { status } = req.body;
 
-    const updated = await taskService.update({ _id: id, status });
+    const result = await taskService.update({ _id: taskId, status }, userId);
 
-    if (!updated) return next(errors.tasks.notUpdated);
+    if (result.statusCode) return next(result);
 
     return res.status(statusCodes.noContent).json({});
   },

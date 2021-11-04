@@ -31,22 +31,27 @@ describe('TaskModel', () => {
   });
 
   describe('getAll', () => {
-    describe('when it has no tasks', () => {
-      it('should return an array', async () => {
-        const response = await TaskModel.getAll();
+    const { _id: userId } = mockData.users[0];
 
+    describe('when it has no tasks', () => {
+      let response;
+
+      before(async () => {
+        response = await TaskModel.getAll(userId);
+      });
+
+      it('should return an array', async () => {
         expect(response).to.be.an('array');
       });
 
       it('should return an empty array', async () => {
-        const response = await TaskModel.getAll();
-
         expect(response).to.be.empty;
       });
     });
 
     describe('when it has tasks', () => {
-      const tasks = [...mockData.tasks];
+      const tasks = mockData.tasks.filter((task) => task.userId === userId);
+      let response;
 
       before(async () => {
         const asyncTaskInsertions = [];
@@ -60,6 +65,8 @@ describe('TaskModel', () => {
         insertions.forEach(({ insertedId }, index) => {
           tasks[index] = { ...tasks[index], _id: insertedId };
         });
+
+        response = await TaskModel.getAll(userId);
       });
 
       after(async () => {
@@ -67,14 +74,10 @@ describe('TaskModel', () => {
       });
 
       it('should return an array', async () => {
-        const response = await TaskModel.getAll();
-
         expect(response).to.be.an('array');
       });
 
       it('should return an array with the tasks', async () => {
-        const response = await TaskModel.getAll();
-
         expect(response).to.have.lengthOf(tasks.length);
         response.forEach((task, index) => {
           expect(task).to.deep.equal(tasks[index]);
@@ -161,6 +164,43 @@ describe('TaskModel', () => {
       });
     });
   });
+
+  describe('getById', () => {
+    describe('when the task does not exist', () => {
+      const { _id: id } = mockData.tasks[0];
+
+      it('should return null', async () => {
+        const response = await TaskModel.getById(id);
+
+        expect(response).to.be.null;
+      });
+    });
+
+    describe('when it has tasks', () => {
+      const { _id, ...task } = mockData.tasks[0];
+      let id;
+      let response;
+
+      before(async () => {
+        const { insertedId } = await connectionMock.collection('tasks').insertOne(task);
+        id = insertedId;
+
+        response = await TaskModel.getById(insertedId);
+      });
+
+      after(async () => {
+        await connectionMock.collection('tasks').deleteMany({});
+      });
+
+      it('should return an object', async () => {
+        expect(response).to.be.an('object');
+      });
+
+      it('should return the task', async () => {
+        expect(response).to.deep.equal({ _id: id, ...task });
+      });
+    });
+  });
 });
 
 describe('UserModel', () => {
@@ -186,7 +226,7 @@ describe('UserModel', () => {
 
   describe('create', () => {
     describe('on success', () => {
-      const { user } = mockData;
+      const user = mockData.users[0];
       const { email } = user;
 
       after(async () => {
@@ -209,7 +249,7 @@ describe('UserModel', () => {
 
   describe('findByEmail', () => {
     describe('on failure', () => {
-      const { email } = mockData.user;
+      const { email } = mockData.users[0];
       let response;
 
       before(async () => {

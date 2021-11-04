@@ -6,10 +6,10 @@ const getTaskCollection = async () => mongoConnection.getConnection()
   .then((db) => db.collection('tasks'));
 
 module.exports = {
-  getAll: async () => {
+  getAll: async (userId) => {
     const tasksCollection = await getTaskCollection();
 
-    const tasks = await tasksCollection.find().toArray();
+    const tasks = await tasksCollection.find({ userId }).toArray();
 
     return tasks;
   },
@@ -37,5 +37,13 @@ module.exports = {
       .updateOne({ _id: new ObjectId(id) }, { $set: { ...updatedTask } });
 
     return modifiedCount;
+  },
+
+  getById: async (id) => {
+    const tasksCollection = await getTaskCollection();
+
+    const task = tasksCollection.findOne({ _id: new ObjectId(id) });
+
+    return task;
   },
 };
