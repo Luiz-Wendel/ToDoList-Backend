@@ -12,6 +12,11 @@ module.exports = {
       code: 'not_updated',
       message: 'Task not found or has nothing to update',
     },
+    ownership: {
+      statusCode: statusCodes.forbidden,
+      code: 'not_allowed',
+      message: 'Forbidden',
+    },
   },
 
   users: {
@@ -26,6 +31,7 @@ module.exports = {
       message: 'Invalid email or password',
     },
   },
+
   jwt: {
     notFound: {
       statusCode: statusCodes.unauthorized,
