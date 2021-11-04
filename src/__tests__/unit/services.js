@@ -13,9 +13,14 @@ const errors = require('../../schemas/errorsSchema');
 describe('taskService', () => {
   describe('getAll', () => {
     describe('when it has no tasks', () => {
-      before(() => {
+      const { _id: userId } = mockData.users[0];
+      let response;
+
+      before(async () => {
         sinon.stub(TaskModel, 'getAll')
           .resolves([]);
+
+        response = await taskService.getAll(userId);
       });
 
       after(() => {
@@ -23,24 +28,24 @@ describe('taskService', () => {
       });
 
       it('should return an array', async () => {
-        const response = await taskService.getAll();
-
         expect(response).to.be.an('array');
       });
 
       it('should return an empty array', async () => {
-        const response = await taskService.getAll();
-
         expect(response).to.be.empty;
       });
     });
 
     describe('when it has tasks', () => {
-      const tasks = [...mockData.tasks];
+      const { _id: userId } = mockData.users[0];
+      const tasks = mockData.tasks.filter((task) => task.userId === userId);
+      let response;
 
-      before(() => {
+      before(async () => {
         sinon.stub(TaskModel, 'getAll')
           .resolves(tasks);
+
+        response = await taskService.getAll(userId);
       });
 
       after(() => {
@@ -48,14 +53,10 @@ describe('taskService', () => {
       });
 
       it('should return an array', async () => {
-        const response = await taskService.getAll();
-
         expect(response).to.be.an('array');
       });
 
       it('should return an array with the tasks', async () => {
-        const response = await taskService.getAll();
-
         expect(response).to.be.deep.equal(tasks);
       });
     });
