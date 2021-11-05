@@ -54,6 +54,6 @@ module.exports = {
 
     if (result.statusCode) return next(result);
 
-    return res.status(statusCodes.noContent).json({});
+    return res.status(statusCodes.ok).json(result);
   },
 };
