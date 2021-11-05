@@ -7,9 +7,6 @@ module.exports = Joi.object({
     .min(minimalDescriptionLength)
     .required(),
 
-  createdAt: Joi.number()
-    .required(),
-
   status: Joi.string()
     .pattern(/^(Pending|In progress|Done)$/)
     .required()
