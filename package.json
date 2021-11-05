@@ -4,6 +4,7 @@
   "description": "This is the back end app of the To Do List made for the Career Blitz by Trybe",
   "main": "src/api",
   "scripts": {
+    "start": "node .",
     "dev": "nodemon .",
     "test": "mocha src/__tests__/unit/*.js --exit",
     "test:coverage": "nyc --reporter html --reporter text --report-dir coverage/summary npm test"
